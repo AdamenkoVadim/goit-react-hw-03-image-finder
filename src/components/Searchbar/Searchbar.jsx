@@ -1,11 +1,30 @@
+import React from "react";
 import css from "components/Searchbar/Searchbar.module.css"
+/* import { AiOutlineSearch } from 'react-icons/ai'; */
+export class Searchbar extends React.Component{
+  state = {
+    searchName:'',
+  }
 
-export const Searchbar = () => {
+  hendleChangeName = (e) => {
+    this.setState({searchName: e.currentTarget.value.toLowerCase()})
+  }
+
+  hendleSubmit = (e) => {
+    e.preventDefault();
+    this.props.submitSearchbar(this.state.searchName);
+    this.setState({searchName: ''})
+  }
+  render() {
     return (
         <header className = {css.Searchbar} >
-          <form className={css.SearchForm}>
+          <form 
+            className={css.SearchForm} 
+            noSubmit = {this.hendleSubmit}
+          >
+            
             <button type="submit" className={css.SearchForm__button}>
-            <span className={css.SearchForm__button__label}>Search</span>
+            <span class="button-label">Search</span>
             </button>
 
           <input
@@ -14,8 +33,9 @@ export const Searchbar = () => {
             autocomplete="off"
             autofocus
             placeholder="Search images and photos"
+            onChange = {this.hendleChangeName}
           />
           </form>
         </header>
-    )
+    )}
 }

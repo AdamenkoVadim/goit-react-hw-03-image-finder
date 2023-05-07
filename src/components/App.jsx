@@ -1,9 +1,14 @@
+import { Component } from "react"
 import { Searchbar } from "./Searchbar/Searchbar";
 
-export const App = () => {
+export  class App extends Component{
+  submitSearchbar = searchName => {
+    console.log(searchName);
+  }
+  render (){
   return (
-    <div>
-     <Searchbar/>
-    </div>
-  );
+    <>
+     <Searchbar onSubmitForm = {this.submitSearchbar}/>
+    </>
+  )};
 };
