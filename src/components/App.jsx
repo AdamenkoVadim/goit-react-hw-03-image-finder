@@ -1,14 +1,122 @@
 import { Component } from "react"
+import { api } from 'service/Api';
+import { ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { Searchbar } from "./Searchbar/Searchbar";
+import { Loader } from "./Loader/Loader";
+import { ImageGallery } from "./ImageGallery/ImageGallery";
+import { Button } from "./Button/Button";
+import { Modal } from "./Modal/Modal";
 
 export  class App extends Component{
-  submitSearchbar = searchName => {
-    console.log(searchName);
+
+  state ={
+    searchName: '',
+    status: 'idle',
+    pictures: [],
+    page: 1,
+    showModal: false,
+    largeImageURL: null,
+    isVisibleBtn: false,
   }
+
+  async componentDidUpdate(prevProps, prevState) {
+    const { searchName, page } = this.state;
+
+    if (prevState.searchName !== searchName) {
+      this.setState({ status: 'pending' });
+
+      const response = await api.fetchResponce(searchName, page);
+
+      if (response.hits <= 0) {
+        toast.error(`No hemos encontrado "${searchName}"`);
+        return;
+      } else {
+        toast.success(`Nosotros encontró "${response.total}" fotos "${searchName}"`);
+      }
+
+      this.setState({
+        pictures: response.hits,
+        isVisibleBtn: true,
+        status: 'resolved',
+      });
+      return;
+    }
+
+    if (prevState.page !== page) {
+      this.setState({ status: 'pending' });
+      const response = await api.fetchResponce(searchName, page);
+      this.setState(prevState => ({
+        pictures: [...prevState.pictures, ...response.hits],
+        status: 'resolved',
+      }));
+      return;
+    }
+  }
+
+  hendleFormSubmit = searchName => {
+    this.setState({
+      searchName:searchName,
+      page:1,
+      pictures:[],
+      status:'idle',
+      isVisibleBtn: false,
+    })
+  }
+  
+  openModal = largeImageURL => {
+    this.setState({
+      showModal: true,
+      largeImageURL: largeImageURL,
+    });
+  };
+
+  closeModal = () => {
+    this.setState({
+      showModal: false,
+    });
+  };
+
+  loadMore = () => {
+    this.setState(prevState => ({
+      page: prevState.page + 1,
+    }));
+  };
+
   render (){
+    const { pictures, largeImageURL, showModal, status, isVisibleBtn } =
+    this.state;
   return (
     <>
-     <Searchbar onSubmitForm = {this.submitSearchbar}/>
+     <Searchbar onSubmit = {this.hendleFormSubmit}/>
+
+     {pictures.length > 0 && (
+          <ImageGallery 
+            pictures={pictures} 
+            openModal={this.openModal} 
+          />
+      )}
+
+     {status === 'pending' && 
+          <Loader 
+          />
+      }
+
+     {status === 'resolved' && isVisibleBtn && 
+         <Button 
+            loadMore={this.loadMore}  
+         />
+      }
+
+      {showModal ? (
+        <Modal
+          largeImageURL={largeImageURL}
+          onClose={this.closeModal}
+        />
+      ) : null}
+
+     <ToastContainer/>
     </>
   )};
 };
