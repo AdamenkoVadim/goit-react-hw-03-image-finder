@@ -19,6 +19,7 @@ export  class App extends Component{
     showModal: false,
     largeImageURL: null,
     isVisibleBtn: false,
+    total: null,
   }
 
   async componentDidUpdate(prevProps, prevState) {
@@ -40,6 +41,7 @@ export  class App extends Component{
         pictures: response.hits,
         isVisibleBtn: true,
         status: 'resolved',
+        total: response.total,
       });
       return;
     }
@@ -85,7 +87,7 @@ export  class App extends Component{
   };
 
   render (){
-    const { pictures, largeImageURL, showModal, status, isVisibleBtn } =
+    const { pictures, largeImageURL, showModal, status, isVisibleBtn, total } =
     this.state;
   return (
     <>
@@ -98,12 +100,12 @@ export  class App extends Component{
           />
       )}
 
-     {status === 'pending' && 
+     {status === 'pending' && pictures.length !== 0 &&
           <Loader 
           />
       }
 
-     {status === 'resolved' && isVisibleBtn && 
+     {status === 'resolved' && isVisibleBtn && pictures.length !== total &&
          <Button 
             loadMore={this.loadMore}  
          />
